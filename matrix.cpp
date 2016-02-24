@@ -1,3 +1,6 @@
+//NOTE: compile as
+//g++ matrix.cpp -o mcpp.out -l papi
+
 //#include <omp.h>
 #include <stdio.h>
 #include <iostream>
@@ -112,7 +115,6 @@ void OnMultLine(int m_ar, int m_br)
 				temp += pha[i*m_ar+k] * phb[k*m_br+j];
 			}
 			phc[i*m_ar+j]=temp;
-			printf("%f\n", temp);
 		}
 	}
 
