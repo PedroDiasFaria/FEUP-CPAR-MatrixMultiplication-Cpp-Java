@@ -1,7 +1,7 @@
 //NOTE: compile as
-//g++ matrix.cpp -o mcpp.out -l papi
+//g++ matrix.cpp -o mcpp -l papi -fopenmp
 
-//#include <omp.h>
+#include <omp.h>
 #include <stdio.h>
 #include <iostream>
 #include <iomanip>
@@ -109,12 +109,12 @@ void OnMultLine(int m_ar, int m_br)
 
 	for(i=0; i<m_ar; i++)
 	{	for( k=0; k<m_ar; k++)
-		{	temp = 0;
+		{	temp = pha[i*m_ar+k];
 			for( j=0; j<m_br; j++)
 			{	
-				temp += pha[i*m_ar+k] * phb[k*m_br+j];
+				phc[i*m_ar+j] +=  temp * phb[k*m_br+j];
 			}
-			phc[i*m_ar+j]=temp;
+			//phc[i*m_ar+j]=temp;
 		}
 	}
 
@@ -202,6 +202,7 @@ int main (int argc, char *argv[])
 	do {
 		cout << endl << "1. Multiplication" << endl;
 		cout << "2. Line Multiplication" << endl;
+		cout << "3. Both" << endl;
 		cout << "Selection?: ";
 		cin >>op;
 		if (op == 0)
@@ -221,9 +222,16 @@ int main (int argc, char *argv[])
 				break;
 			case 2:
 				OnMultLine(lin, col);
-    
+				break;
+			case 3:
+				cout << endl << "Mult" <<endl;
+				OnMult(lin, col);
+				cout << endl << "Line Mult" <<endl;
+    			OnMultLine(lin, col);
 				break;
 		}
+
+		printf("\n\n");
 
   		ret = PAPI_stop(EventSet, values);
   		if (ret != PAPI_OK) cout << "ERRO: Stop PAPI" << endl;
