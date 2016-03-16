@@ -9,6 +9,7 @@
 using namespace std;
 
 #define SYSTEMTIME clock_t
+#define BILLION 1000000000L
 
 /*Algorithms*/
 void sequentialBasicAlg(int m_ar, int m_br, double *pha, double *phb, double *phc){
@@ -17,12 +18,12 @@ void sequentialBasicAlg(int m_ar, int m_br, double *pha, double *phb, double *ph
   double temp;
 
 	for(i=0; i<m_ar; i++){
-    for(j=0; j<m_br; j++){
-      temp = 0;
-			for(k=0; k<m_ar; k++){
-				temp += pha[i*m_ar+k] * phb[k*m_br+j];
-			}
-			phc[i*m_ar+j]=temp;
+		for(j=0; j<m_br; j++){
+		  temp = 0;
+				for(k=0; k<m_ar; k++){
+					temp += pha[i*m_ar+k] * phb[k*m_br+j];
+				}
+				phc[i*m_ar+j]=temp;
 		}
 	}
 
@@ -43,11 +44,36 @@ void sequentialOptimizedAlg(int m_ar, int m_br, double *pha, double *phb, double
 
 }
 
-void parallelBasicAlg(int m_ar, int m_br, int nr_threads, double *pha, double *phb, double *phc){
-
+void parallelBasicAlg(int	 m_ar, int m_br, int nr_threads, double *pha, double *phb, double *phc){
+  
+  int i, j, k;
+  double temp;
+  
+  #pragma omp parallel for private(j, k)  num_threads(nr_threads)
+	for(i=0; i<m_ar; i++){
+		for(j=0; j<m_br; j++){
+		  temp = 0;
+				for(k=0; k<m_ar; k++){
+					temp += pha[i*m_ar+k] * phb[k*m_br+j];
+				}
+				phc[i*m_ar+j]=temp;
+		}
+	}
 }
 
 void parallelOptimizedAlg(int m_ar, int m_br, int nr_threads, double *pha, double *phb, double *phc){
+
+  int i, j, k;
+  double temp;
+
+	#pragma omp parallel for private(j, k)  num_threads(nr_threads)
+	  for(i=0; i<m_ar; i++){
+		for(k=0; k<m_ar; k++){
+		  for(j=0; j<m_br; j++){
+			phc[i*m_ar+j] +=  pha[i*m_ar+k] * phb[k*m_br+j];
+		  }
+		}
+	  }
 
 }
 /**/
@@ -86,6 +112,8 @@ void init_papi(){
 /*Matrix creation and algorithm call*/
 void matrix_mult(int m_ar, int m_br, int opt, const int nr_threads){
   SYSTEMTIME Time1, Time2;
+  struct timespec start, end;
+  
   int i, j, k;
 	char st[100];
 	double *pha, *phb, *phc;
@@ -102,7 +130,8 @@ void matrix_mult(int m_ar, int m_br, int opt, const int nr_threads){
     for(j=0; j<m_br; j++)
       phb[i*m_br + j] = (double)(i+1);
 
-  Time1 = clock();
+  clock_gettime(CLOCK_REALTIME, &start);
+  Time1 = clock();  
   switch (opt) {
     case 1:
       cout << "Executing sequentialBasicAlg" <<endl;
@@ -124,12 +153,16 @@ void matrix_mult(int m_ar, int m_br, int opt, const int nr_threads){
       cout << "Wrong option! opt=" << opt << ". Please use 1, 2, 3 or 4." << endl;
       exit(0);
   }
+  clock_gettime(CLOCK_REALTIME, &end);
   Time2 = clock();
 
-  sprintf(st, "\nTime: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
-	cout << st;
+  sprintf(st, "\nTotal Time of execution: %3.3lf seconds", ( end.tv_sec - start.tv_sec ) + (double)( end.tv_nsec - start.tv_nsec ) / (double)BILLION);
+  cout << st;
+  sprintf(st, "\nTotal Time accumulated between threads: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
+  cout << st;
 
-	cout << "Result matrix: " << endl;
+
+	cout << "\nResult matrix: " << endl;
 	for(i=0; i<1; i++)
 	{	for(j=0; j<min(10,m_br); j++)
 			cout << phc[j] << " ";
