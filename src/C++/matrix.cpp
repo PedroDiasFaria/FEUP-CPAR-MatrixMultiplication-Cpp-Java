@@ -5,6 +5,7 @@
 #include <time.h>
 #include <cstdlib>
 #include <papi.h>
+#include <math.h>       /* pow */
 
 using namespace std;
 
@@ -45,10 +46,10 @@ void sequentialOptimizedAlg(int m_ar, int m_br, double *pha, double *phb, double
 }
 
 void parallelBasicAlg(int	 m_ar, int m_br, int nr_threads, double *pha, double *phb, double *phc){
-  
+
   int i, j, k;
   double temp;
-  
+
   #pragma omp parallel for private(j, k)  num_threads(nr_threads)
 	for(i=0; i<m_ar; i++){
 		for(j=0; j<m_br; j++){
@@ -79,6 +80,12 @@ void parallelOptimizedAlg(int m_ar, int m_br, int nr_threads, double *pha, doubl
 /**/
 
 /*Aux functions*/
+
+int MflopsCalc(int nInstructions, double executionTime){
+  int MILLION = 1000000;
+  return (int) ((2 * pow(nInstructions, 3))/executionTime) / MILLION;			//Cap = [Mflop/s] = (2n^3/t)
+}
+
 float produtoInterno(float *v1, float *v2, int col){
 	int i;
 	float soma=0.0;
@@ -112,8 +119,8 @@ void init_papi(){
 /*Matrix creation and algorithm call*/
 void matrix_mult(int m_ar, int m_br, int opt, const int nr_threads){
   SYSTEMTIME Time1, Time2;
-  struct timespec start, end;
-  
+  struct timespec startTime, endTime;
+
   int i, j, k;
 	char st[100];
 	double *pha, *phb, *phc;
@@ -130,8 +137,8 @@ void matrix_mult(int m_ar, int m_br, int opt, const int nr_threads){
     for(j=0; j<m_br; j++)
       phb[i*m_br + j] = (double)(i+1);
 
-  clock_gettime(CLOCK_REALTIME, &start);
-  Time1 = clock();  
+  clock_gettime(CLOCK_REALTIME, &startTime);
+  Time1 = clock();
   switch (opt) {
     case 1:
       cout << "Executing sequentialBasicAlg" <<endl;
@@ -153,13 +160,16 @@ void matrix_mult(int m_ar, int m_br, int opt, const int nr_threads){
       cout << "Wrong option! opt=" << opt << ". Please use 1, 2, 3 or 4." << endl;
       exit(0);
   }
-  clock_gettime(CLOCK_REALTIME, &end);
+  clock_gettime(CLOCK_REALTIME, &endTime);
   Time2 = clock();
 
-  sprintf(st, "\nTotal Time of execution: %3.3lf seconds", ( end.tv_sec - start.tv_sec ) + (double)( end.tv_nsec - start.tv_nsec ) / (double)BILLION);
+  double executionTime = ( endTime.tv_sec - startTime.tv_sec ) + (double)( endTime.tv_nsec - startTime.tv_nsec ) / (double)BILLION;
+  sprintf(st, "\nTotal Time of execution: %3.3lf seconds", executionTime);
   cout << st;
   sprintf(st, "\nTotal Time accumulated between threads: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
   cout << st;
+  int mFlops = MflopsCalc(max(m_ar, m_br), executionTime);
+  cout << "Cap(Mflop/s) = " << mFlops << endl;
 
 
 	cout << "\nResult matrix: " << endl;
