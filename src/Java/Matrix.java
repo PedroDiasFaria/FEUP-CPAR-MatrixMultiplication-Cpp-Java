@@ -3,13 +3,13 @@ import java.lang.*;
 public class Matrix {
 
 	private int lin, col;
-	private double[][] matrixValues;
+	private long[][] matrixValues;
 
 	/*Constructor & Set/Get*/
 	public Matrix(int lin, int col, char matrixID){
 		this.lin = lin;
 		this.col = col;
-		matrixValues = new double[lin][col];
+		matrixValues = new long[lin][col];
 		int multiplier = 0;
 
 		switch(matrixID){
@@ -27,14 +27,14 @@ public class Matrix {
 
 		for(i=0; i<lin; i++)
 			for(j=0; j<col; j++)
-				matrixValues[i][j] = (double)(1.0 + i*multiplier);
+				matrixValues[i][j] = (long)(1.0 + i*multiplier);
 	}
 
-	public void set(int lin, int col, double value){
+	public void set(int lin, int col, long value){
 		matrixValues[lin][col] = value;
 	}
 
-	public double get(int l, int c){
+	public long get(int l, int c){
 		return matrixValues[l][c];
 	}
 	/**/
@@ -42,7 +42,7 @@ public class Matrix {
 	/*Algorithms*/
 	public static void sequentialBasicAlg(int m_ar, int m_br, Matrix pha, Matrix phb, Matrix phc) {
 	  	int i, j, k;
-	  	double temp;
+	  	long temp;
 
 		for(i = 0; i < m_ar; i++) {
 		    for(j = 0; j < m_br; j++) {
@@ -109,13 +109,15 @@ public class Matrix {
 				System.out.print(String.valueOf(phc.get(i, j)).split("\\.")[0] + " ");
 		}
 
+
+
 		System.out.println("");
 	}
 
 
-	public static int MflopsCalc(int nInstructions, double executionTime){
-		int MILLION = 1000000;
-		return (int) ((2 * Math.pow(nInstructions, 3))/executionTime) / MILLION;			//Cap = [Mflop/s] = (2n^3/t)
+	public static double MflopsCalc(int nInstructions, double executionTime){
+		double MILLION = 1000000;
+		return (double) ((2 * Math.pow(nInstructions, 3))/executionTime) / MILLION;			//Cap = [Mflop/s] = (2n^3/t)
 	}
 	/**/
 

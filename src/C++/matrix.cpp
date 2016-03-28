@@ -81,9 +81,9 @@ void parallelOptimizedAlg(int m_ar, int m_br, int nr_threads, double *pha, doubl
 
 /*Aux functions*/
 
-int MflopsCalc(int nInstructions, double executionTime){
-  int MILLION = 1000000;
-  return (int) ((2 * pow(nInstructions, 3))/executionTime) / MILLION;			//Cap = [Mflop/s] = (2n^3/t)
+double MflopsCalc(int nInstructions, double executionTime){
+  double MILLION = 1000000;
+  return (double) ((2 * pow(nInstructions, 3))/executionTime) / MILLION;			//Cap = [Mflop/s] = (2n^3/t)
 }
 
 float produtoInterno(float *v1, float *v2, int col){
@@ -168,7 +168,7 @@ void matrix_mult(int m_ar, int m_br, int opt, const int nr_threads){
   cout << st;
   sprintf(st, "\nTotal Time accumulated between threads: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
   cout << st;
-  int mFlops = MflopsCalc(max(m_ar, m_br), executionTime);
+  double mFlops = MflopsCalc(max(m_ar, m_br), executionTime);
   cout << "Cap(Mflop/s) = " << mFlops << endl;
 
 
