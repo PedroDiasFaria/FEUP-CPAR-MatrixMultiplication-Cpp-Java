@@ -1,5 +1,5 @@
 # FEUP-CPAR-Proj1
-CPAR Project 1 - Perform Evaluation of a single core 
+##CPAR Project 1 - Perform Evaluation of a single core 
 
 Implementation of the ijk and ikj algorithms to multiply matrixes in C++ and Java
 
